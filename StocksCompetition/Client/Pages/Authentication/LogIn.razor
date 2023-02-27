@@ -1,0 +1,26 @@
+<EditForm class="auth-form" Model="@_logInForm">
+    <h1>Log In</h1>
+    <div class="form-group">
+        <div class="text-input-group">
+            <InputText placeholder="Discord Username"
+                       type="text"
+                       @bind-Value="_logInForm.DiscordUsername"
+                       style="margin-bottom: 10px" />
+            <InputText placeholder="Password"
+                       type="password"
+                       @bind-Value="_logInForm.Password" />
+        </div>
+    </div>
+
+    <footer>
+        <button class="link" @onclick="() => OnSignUpClick.InvokeAsync()">Sign Up</button>
+        <button class="btn-pink">Log In</button>
+    </footer>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback OnSignUpClick { get; set; }
+
+    private readonly LogInForm _logInForm = new();
+}

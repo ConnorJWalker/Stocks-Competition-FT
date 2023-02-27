@@ -1,0 +1,18 @@
+@page "/Authentication"
+
+<div class="auth-container">
+    @if (_currentPage == "signup")
+    {
+        <SignUp OnLogInClick="SwitchForms" />
+    }
+    else
+    {
+        <LogIn OnSignUpClick="SwitchForms" />
+    }
+</div>
+
+@code {
+    private string _currentPage = "signup";
+
+    private void SwitchForms() => _currentPage = _currentPage == "signup" ? "login" : "signup";
+}
