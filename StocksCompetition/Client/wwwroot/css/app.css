@@ -155,6 +155,7 @@ button.link {
 
 .validation-message {
     color: red;
+    margin-bottom: 3px;
 }
 
 #blazor-error-ui {

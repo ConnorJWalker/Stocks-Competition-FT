@@ -1,53 +1,62 @@
-<EditForm class="auth-form" Model="@_singUpForm">
+<EditForm class="auth-form" EditContext="@_editContext">
+    <DataAnnotationsValidator />
+
     @if (_currentPage == "main-form")
     {
         <h1>Sign Up</h1>
         <div class="form-group">
             @if (_singUpForm.ProfilePicture == string.Empty)
             {
-                <div class="profile-picture"><p>Picture</p></div>
+                <div class="profile-picture">
+                    <p>Picture</p>
+                </div>
             }
             else
             {
-                <img class="profile-picture" src="@_singUpForm.ProfilePicture" alt="users avatar" />
+                <img class="profile-picture" src="@_singUpForm.ProfilePicture" alt="users avatar"/>
             }
-        
+
             <div class="text-input-group">
+                <ValidationMessage For="() => _singUpForm.DisplayName"/>
                 <InputText
                     placeholder="Display Name"
                     type="text"
                     @bind-Value="_singUpForm.DisplayName"/>
 
+                <ValidationMessage For="() => _singUpForm.DiscordUsername"/>
                 <InputText
                     placeholder="Discord Username"
                     type="text"
                     @bind-Value="_singUpForm.DiscordUsername"/>
             </div>
         </div>
-        
+
         <div class="form-group">
             <div class="text-input-group">
+                <ValidationMessage For="() => _singUpForm.Password"/>
                 <InputText
                     placeholder="Password"
                     type="password"
                     @bind-Value="_singUpForm.Password"/>
 
+                <ValidationMessage For="() => _singUpForm.ConfirmPassword"/>
                 <InputText
                     placeholder="Confirm Password"
                     type="password"
                     @bind-Value="_singUpForm.ConfirmPassword"/>
             </div>
 
+            <ValidationMessage For="() => _singUpForm.DisplayColour"/>
             <label class="colour-picker" style="background-color: @_singUpForm.DisplayColour">
                 <small>Colour</small>
                 <input
                     type="color"
                     value="@_singUpForm.DisplayColour"
                     onchange="@ColourPickerOnChange"
-                    hidden />
+                    hidden/>
             </label>
         </div>
-        
+
         <footer>
             <button class="link" @onclick="() => OnLogInClick.InvokeAsync()">Log In</button>
             <button class="btn-pink" @onclick="ChangeFormClick">Next</button>
@@ -61,12 +70,12 @@
             <li>Open your browsers dev tools and find cookies</li>
             <li>Copy and paste the value of <code>ft_web_session</code> into the text area</li>
         </ul>
-        
-        <InputTextArea @bind-Value="_singUpForm.FreetradeCookie" />
-        
+
+        <InputTextArea @bind-Value="_singUpForm.FreetradeCookie"/>
+
         <footer>
             <button class="link" @onclick="() => OnLogInClick.InvokeAsync()">Log In</button>
-            
+
             <div>
                 <button @onclick="ChangeFormClick">Back</button>
                 <button class="btn-pink">Sign Up</button>
@@ -75,11 +84,13 @@
     }
 </EditForm>
 
-    @code {
+@code {
     [Parameter]
     public EventCallback OnLogInClick { get; set; }
     
     private readonly SignUpForm _singUpForm = new();
+
+    private EditContext? _editContext;
 
     private string _currentPage = "main-form";
 
@@ -88,5 +99,16 @@
         _singUpForm.DisplayColour = e.Value!.ToString()!;
     }
 
-    private void ChangeFormClick() => _currentPage = _currentPage == "main-form" ? "freetrade-cookie" : "main-form";
+    private void ChangeFormClick()
+    {
+        if (_editContext!.Validate())
+        {
+            _currentPage = _currentPage == "main-form" ? "freetrade-cookie" : "main-form";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(_singUpForm);
+    }
 }
