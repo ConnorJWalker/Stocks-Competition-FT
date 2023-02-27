@@ -1,0 +1,66 @@
+@page "/SignUp"
+
+<div class="auth-container">
+    <EditForm class="auth-form" Model="@_singUpForm">
+        <h1>Sign Up</h1>
+        <div class="form-group">
+            @if (_singUpForm.ProfilePicture == string.Empty)
+            {
+                <div class="profile-picture"><p>Picture</p></div>
+            }
+            else
+            {
+                <img class="profile-picture" src="@_singUpForm.ProfilePicture" alt="users avatar" />
+            }
+            
+            <div class="text-input-group">
+                <InputText
+                    placeholder="Display Name"
+                    type="text"
+                    @bind-Value="_singUpForm.DisplayName"/>
+
+                <InputText
+                    placeholder="Discord Username"
+                    type="text"
+                    @bind-Value="_singUpForm.DiscordUsername"/>
+            </div>
+        </div>
+            
+        <div class="form-group">
+            <div class="text-input-group">
+                <InputText
+                    placeholder="Password"
+                    type="password"
+                    @bind-Value="_singUpForm.Password"/>
+
+                <InputText
+                    placeholder="Confirm Password"
+                    type="password"
+                    @bind-Value="_singUpForm.ConfirmPassword"/>
+            </div>
+
+            <label class="colour-picker" style="background-color: @_singUpForm.DisplayColour">
+                <small>Colour</small>
+                <input
+                    type="color"
+                    value="@_singUpForm.DisplayColour"
+                    onchange="@ColourPickerOnChange"
+                    hidden/>
+            </label>
+        </div>
+
+        <footer>
+            <button class="link">Log In</button>
+            <button class="btn-pink">Next</button>
+        </footer>
+    </EditForm>
+</div>
+
+@code {
+    private readonly StocksCompetition.Shared.SignUp _singUpForm = new();
+
+    private void ColourPickerOnChange(ChangeEventArgs e)
+    {
+        _singUpForm.DisplayColour = e.Value!.ToString()!;
+    }
+}
