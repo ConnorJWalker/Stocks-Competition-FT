@@ -1,13 +1,15 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StocksCompetition.Server.Entities;
 using StocksCompetition.Server.Models;
+using StocksCompetition.Server.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -17,7 +19,12 @@ string dbConnectionString = builder.Configuration.GetConnectionString("MariaDbCo
 builder.Services.AddDbContext<ServerDbContext>(options => 
     options.UseMySql(dbConnectionString, ServerVersion.AutoDetect(dbConnectionString)));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ServerDbContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+}).AddEntityFrameworkStores<ServerDbContext>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -37,6 +44,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<AuthenticationService>();
+
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,6 +64,16 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors(policy =>
+{
+    policy.AllowAnyMethod();
+    policy.SetIsOriginAllowed(_ => true);
+    policy.AllowCredentials();
+});
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapFallbackToFile("index.html");
