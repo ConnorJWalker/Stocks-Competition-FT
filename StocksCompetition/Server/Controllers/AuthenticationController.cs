@@ -22,11 +22,6 @@ public class AuthenticationController : Controller
     [Route("LogIn")]
     public async Task<IActionResult> LogIn([FromBody] LogInForm logInForm)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest("Discord Username and Password are required fields");
-        }
-
         try
         {
             JwtSecurityToken token = await _authenticationService.LogIn(logInForm);
