@@ -7,9 +7,13 @@ public class ServerService
 {
     private readonly HttpClient _httpClient;
 
-    public ServerService(string baseAddress)
+    public ServerService(IConfiguration configuration)
     {
-        _httpClient = new HttpClient { BaseAddress = new Uri(baseAddress) };
+        _httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(configuration["ServerBaseAddress"] 
+                ?? throw  new MissingFieldException("No server base address provided"))
+        };
     }
 
     public async Task<JwtResponse> SignUp(SignUpForm signUpForm)

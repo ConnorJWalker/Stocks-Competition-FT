@@ -9,7 +9,7 @@ WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped<ServerService>(_ => new ServerService(builder.Configuration["ServerBaseAddress"] ?? "https://localhost:4000/api/"));
+builder.Services.AddScoped<ServerService>();
 
 builder.Services.AddScoped<AuthenticationStateProvider, ClientAuthenticationStateProvider>();
 builder.Services.AddAuthorizationCore();
