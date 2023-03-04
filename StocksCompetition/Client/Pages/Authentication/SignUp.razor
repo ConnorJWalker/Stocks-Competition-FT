@@ -1,4 +1,8 @@
-<EditForm class="auth-form" EditContext="@_editContext">
+@inject ServerService ServerService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+
+<EditForm class="auth-form" EditContext="_editContext" OnValidSubmit="OnSubmit">
     <DataAnnotationsValidator />
 
     @if (_currentPage == "main-form")
@@ -78,7 +82,7 @@
 
             <div>
                 <button @onclick="ChangeFormClick">Back</button>
-                <button class="btn-pink">Sign Up</button>
+                <button type="submit" class="btn-pink">Sign Up</button>
             </div>
         </footer>
     }
@@ -105,6 +109,18 @@
         {
             _currentPage = _currentPage == "main-form" ? "freetrade-cookie" : "main-form";
         }
+    }
+
+    private async Task OnSubmit()
+    {
+        // todo: fetch profile picture from discord
+        _singUpForm.ProfilePicture = "tempPictureUrl.png";
+        
+        JwtResponse response = await ServerService.SignUp(_singUpForm);
+        await LocalStorage.SetItemAsync("token", response);
+        StateHasChanged();
+        
+        NavigationManager.NavigateTo("", true);
     }
 
     protected override void OnInitialized()

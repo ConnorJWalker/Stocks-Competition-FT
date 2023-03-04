@@ -1,4 +1,8 @@
-<EditForm class="auth-form" EditContext="@_editContext" OnSubmit="@OnSubmit">
+@inject ServerService ServerService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+
+<EditForm class="auth-form" EditContext="@_editContext" OnValidSubmit="OnSubmit">
     <DataAnnotationsValidator />
     
     <h1>Log In</h1>
@@ -31,9 +35,13 @@
 
     private EditContext? _editContext;
 
-    private void OnSubmit()
+    private async Task OnSubmit()
     {
-        _editContext!.Validate();
+        JwtResponse response = await ServerService.LogIn(_logInForm);
+        await LocalStorage.SetItemAsync("token", response);
+        StateHasChanged();
+        
+        NavigationManager.NavigateTo("", true);
     }
     
     protected override void OnInitialized()

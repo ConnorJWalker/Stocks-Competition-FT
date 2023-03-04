@@ -1,15 +1,10 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager NavigationManager
 
 <div class="page">
     <main>
         <article>
             @Body
         </article>
-        
-        <NotAuthorized>
-            @{ NavigationManager.NavigateTo("Authentication"); }
-        </NotAuthorized>
     </main>
 </div>
 

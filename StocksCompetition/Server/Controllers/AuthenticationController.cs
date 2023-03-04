@@ -25,11 +25,7 @@ public class AuthenticationController : Controller
         try
         {
             JwtSecurityToken token = await _authenticationService.LogIn(logInForm);
-            return Ok(new
-            {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
-            });
+            return Ok(new JwtResponse(new JwtSecurityTokenHandler().WriteToken(token), token.ValidTo));
         }
         catch (LogInException)
         {
@@ -49,11 +45,7 @@ public class AuthenticationController : Controller
         try
         {
             JwtSecurityToken token = await _authenticationService.SignUp(signUpForm);
-            return Ok(new
-            {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
-            });
+            return Ok(new JwtResponse(new JwtSecurityTokenHandler().WriteToken(token), token.ValidTo));
         }
         catch (UserAlreadyExistsException)
         {
