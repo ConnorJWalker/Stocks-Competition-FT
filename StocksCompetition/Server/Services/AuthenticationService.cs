@@ -53,7 +53,7 @@ public class AuthenticationService
         await _context.Users.AddAsync(user);
         
         user.PasswordHash = _passwordHasher.HashPassword(user, user.Password);
-        user.SecurityStamp = new Guid().ToString();
+        user.SecurityStamp = Guid.NewGuid().ToString();
         await _context.SaveChangesAsync();
 
         return GenerateToken(user);
