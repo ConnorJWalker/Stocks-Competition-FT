@@ -1,0 +1,38 @@
+query AccountChart($type: AccountType!, $period: TimePeriod!) {
+  accountDetails(type: $type) {
+    id
+    type
+    currency
+    history(timePeriod: $period) {
+      id
+      period
+      lastUpdated
+      gainLoss {
+        percentage
+        cash {
+          value
+          currency
+          __typename
+        }
+        __typename
+      }
+      data {
+        time
+        value {
+          currency
+          value
+          __typename
+        }
+        valueChange {
+          currency
+          value
+          __typename
+        }
+        percentageChange
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

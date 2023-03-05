@@ -63,6 +63,7 @@ public class AuthenticationService
     {
         var claims = new List<Claim>
         {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim("ProfilePicture", user.ProfilePicture),
             new Claim("DisplayName", user.DisplayName),
             new Claim("DiscordUsername", user.DiscordUsername),

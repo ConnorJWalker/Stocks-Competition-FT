@@ -38,13 +38,15 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters()
     {
         ValidateIssuer = true,
-        ValidateAudience = true,
+        ValidateAudience = false,
         ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!))
     };
 });
 
 builder.Services.AddScoped<AuthenticationService>();
+
+builder.Services.AddSingleton<FreetradeService>();
 
 WebApplication app = builder.Build();
 
