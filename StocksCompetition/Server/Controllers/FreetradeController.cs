@@ -26,7 +26,15 @@ public class FreetradeController : Controller
     public async Task<IActionResult> GetUserChart()
     {
         ClaimsPrincipal principal = User;
-        ApplicationUser user = await _userManager.GetUserAsync(principal) ?? throw new UserAlreadyExistsException();
-        return Ok(await _freetradeService.GetUserChart(user.FreetradeCookie));
+        ApplicationUser user = (await _userManager.GetUserAsync(principal))!;
+
+        try
+        {
+            return Ok(await _freetradeService.GetUserChart(user.FreetradeCookie));
+        }
+        catch (FreetradeException e)
+        {
+            return StatusCode(500, e.Message);
+        }
     }
 }

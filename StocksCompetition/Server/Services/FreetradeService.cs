@@ -1,4 +1,6 @@
+using Newtonsoft.Json.Linq;
 using StocksCompetition.Server.Models;
+using StocksCompetition.Shared.Freetrade;
 
 namespace StocksCompetition.Server.Services;
 
@@ -25,7 +27,7 @@ public class FreetradeService
         }
     }
 
-    public async Task<string> GetUserChart(string cookie)
+    public async Task<AccountDetails> GetUserChart(string cookie)
     {
         var body = new FreetradeRequestBody()
         {
@@ -43,6 +45,18 @@ public class FreetradeService
         message.Headers.Add("Cookie", $"ft_web_session={cookie}");
 
         HttpResponseMessage result = await _client.SendAsync(message);
-        return await result.Content.ReadAsStringAsync();
+        string responseString = await result.Content.ReadAsStringAsync();
+        if (string.IsNullOrEmpty(responseString))
+        {
+            throw new FreetradeException("Could not load user chart from Freetrade");
+        }
+        
+        return JObject.Parse(responseString)["data"]?["accountDetails"]?.ToObject<AccountDetails>()
+            ?? throw new FreetradeException("Cannot convert response to type AccountDetails");
     }
+}
+
+public class FreetradeException : Exception
+{
+    public FreetradeException(string message) : base(message) { }
 }
