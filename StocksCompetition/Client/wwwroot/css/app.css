@@ -5,6 +5,7 @@
 
 html, body, #app, .page, main, main>article {
     height: 100%;
+    overflow: auto;
 }
 
 body {
@@ -156,6 +157,13 @@ button.link {
 .validation-message {
     color: red;
     margin-bottom: 3px;
+}
+
+/* Charts */
+.chart-container {
+    max-width: 1000px;
+    background-color: white;
+    margin: 100px auto;
 }
 
 #blazor-error-ui {

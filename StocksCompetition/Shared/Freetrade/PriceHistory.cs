@@ -15,22 +15,22 @@ public class PriceHistory
     public List<PriceHistoryValue> Data { get; set; }
 }
 
-public struct GainLoss
+public class GainLoss
 {
     public float Percentage { get; set; }
 
     public Value Value { get; set; }
 }
 
-public struct Value
+public class Value
 {
     public string Currency { get; set; }
 
     [JsonProperty("Value")]
-    public double Amount { get; set; }
+    public decimal Amount { get; set; }
 }
 
-public struct PriceHistoryValue
+public class PriceHistoryValue
 {
     public DateTime Time { get; set; }
 

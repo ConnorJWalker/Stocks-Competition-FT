@@ -1,8 +1,41 @@
 ﻿@page "/"
+@using ApexCharts
+@using StocksCompetition.Shared.Freetrade
 
-<PageTitle>Index</PageTitle>
+@inject ServerService ServerService
+<div class="chart-container">
+    @if (_accountDetails is not null)
+    {
+        <h1>Stocks Competition POC</h1>
+        <ApexChart TItem="PriceHistoryValue" Options="@_options">
+            <ApexPointSeries
+                TItem="PriceHistoryValue"
+                Items="_accountDetails!.History.Data"
+                SeriesType="SeriesType.Line"
+                XValue="@(priceHistory => priceHistory.Time)"
+                YValue="@(priceHistory => priceHistory.Value.Amount)"/>
+        </ApexChart>
+    }
+</div>
 
-<h1>Hello, world!</h1>
+<PageTitle>Stocks Competition</PageTitle>
 
-Welcome to your new app.
+@code {
+    private AccountDetails? _accountDetails = null;
+
+    private ApexChartOptions<PriceHistoryValue> _options;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _accountDetails = await ServerService.GetAccountChart();
+
+        _options = new ApexChartOptions<PriceHistoryValue>()
+        {
+            Chart = new Chart()
+            {
+                Toolbar = new Toolbar { Show = false }
+            }
+        };
+    }
+}
 

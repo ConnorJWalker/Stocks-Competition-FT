@@ -24,7 +24,7 @@ public class ServerService
 
     public async Task<JwtResponse> SignUp(SignUpForm signUpForm)
     {
-        return await SendPost<JwtResponse>("authentication/signup", signUpForm);
+        return await SendPost<JwtResponse>("authentication/signup", signUpForm, false);
     }
 
     public async Task<JwtResponse> LogIn(LogInForm logInFrom)
@@ -70,6 +70,6 @@ public class ServerService
             throw new Exception("Response was not success code");
         }
 
-        return await _httpClient.SendAsync(request);
+        return response;
     }
 }
