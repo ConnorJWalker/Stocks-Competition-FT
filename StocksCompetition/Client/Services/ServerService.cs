@@ -58,8 +58,13 @@ public class ServerService
     {
         if (withToken)
         {
-            // Todo: handle refresh tokens
             var token = await _localStorage.GetItemAsync<JwtResponse>("token");
+            if (token.ValidTo < DateTime.UtcNow)
+            {
+                token = await RefreshToken(token);
+                await _localStorage.SetItemAsync("token", token);
+            }
+            
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
         }
 
@@ -71,5 +76,21 @@ public class ServerService
         }
 
         return response;
+    }
+
+    private async Task<JwtResponse> RefreshToken(JwtResponse token)
+    {
+        var message = new HttpRequestMessage(HttpMethod.Post, "authentication/refresh");
+        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
+        message.Content = new StringContent(token.RefreshToken);
+
+        HttpResponseMessage refreshResponse = await _httpClient.SendAsync(message);
+        if (refreshResponse is null || !refreshResponse.IsSuccessStatusCode)
+        {
+            await _localStorage.RemoveItemAsync("token");
+            throw new Exception("Could not refresh authentication token");
+        }
+                
+        return (await refreshResponse.Content.ReadFromJsonAsync<JwtResponse>())!;
     }
 }

@@ -1,6 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using StocksCompetition.Server.Entities;
 using StocksCompetition.Server.Services;
 using StocksCompetition.Shared;
 
@@ -12,10 +13,12 @@ namespace StocksCompetition.Server.Controllers;
 public class AuthenticationController : Controller
 {
     private readonly AuthenticationService _authenticationService;
-    
-    public AuthenticationController(AuthenticationService authenticationService)
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public AuthenticationController(AuthenticationService authenticationService, UserManager<ApplicationUser> userManager)
     {
         _authenticationService = authenticationService;
+        _userManager = userManager;
     }
 
     [HttpPost]
@@ -24,8 +27,7 @@ public class AuthenticationController : Controller
     {
         try
         {
-            JwtSecurityToken token = await _authenticationService.LogIn(logInForm);
-            return Ok(new JwtResponse(new JwtSecurityTokenHandler().WriteToken(token), token.ValidTo));
+            return Ok(await _authenticationService.LogIn(logInForm));
         }
         catch (LogInException)
         {
@@ -44,12 +46,22 @@ public class AuthenticationController : Controller
 
         try
         {
-            JwtSecurityToken token = await _authenticationService.SignUp(signUpForm);
-            return Ok(new JwtResponse(new JwtSecurityTokenHandler().WriteToken(token), token.ValidTo));
+            return Ok(await _authenticationService.SignUp(signUpForm));
         }
         catch (UserAlreadyExistsException)
         {
             return BadRequest("User already exists with this discord username");
         }
+    }
+
+    [HttpPost]
+    [Route("Refresh")]
+    public async Task<IActionResult> Refresh()
+    {
+        string refreshToken = await new StreamReader(Request.Body).ReadToEndAsync();
+        if (string.IsNullOrEmpty(refreshToken)) return BadRequest("Refresh token is required");
+
+        string userId = _userManager.GetUserId(User) ?? throw new LogInException();
+        return Ok(await _authenticationService.RefreshToken(refreshToken, userId));
     }
 }

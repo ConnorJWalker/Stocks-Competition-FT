@@ -6,9 +6,12 @@ public class JwtResponse
 
     public DateTime ValidTo { get; }
 
-    public JwtResponse(string token, DateTime validTo)
+    public string RefreshToken { get; }
+
+    public JwtResponse(string token, DateTime validTo, string refreshToken)
     {
         Token = token;
         ValidTo = validTo;
+        RefreshToken = refreshToken;
     }
 }

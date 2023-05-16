@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StocksCompetition.Server.Entities;
 using StocksCompetition.Server.Models;
@@ -24,7 +25,7 @@ public class AuthenticationService
         _userManager = userManager;
     }
 
-    public async Task<JwtSecurityToken> LogIn(LogInForm logInForm)
+    public async Task<JwtResponse> LogIn(LogInForm logInForm)
     {
         ApplicationUser? user = await _userManager.FindByDiscordUsernameAsync(logInForm.DiscordUsername);
         if (user is null)
@@ -37,11 +38,21 @@ public class AuthenticationService
         {
             throw new LogInException();
         }
-
-        return GenerateToken(user);
+        
+        
+        JwtSecurityToken token = GenerateToken(user);
+        var refreshToken = new RefreshToken(user.Id);
+        await _context.AddAsync(refreshToken);
+        await _context.SaveChangesAsync();
+        
+        return new JwtResponse(
+            new JwtSecurityTokenHandler().WriteToken(token),
+            token.ValidTo,
+            refreshToken.Token.ToString()
+        );
     }
 
-    public async Task<JwtSecurityToken> SignUp(SignUpForm signUpForm)
+    public async Task<JwtResponse> SignUp(SignUpForm signUpForm)
     {
         ApplicationUser? existingUser = await _userManager.FindByDiscordUsernameAsync(signUpForm.DiscordUsername);
         if (existingUser is not null)
@@ -56,14 +67,43 @@ public class AuthenticationService
         user.SecurityStamp = Guid.NewGuid().ToString();
         await _context.SaveChangesAsync();
 
-        return GenerateToken(user);
+        JwtSecurityToken token = GenerateToken(user);
+        var refreshToken = new RefreshToken(user.Id);
+        await _context.AddAsync(refreshToken);
+        await _context.SaveChangesAsync();
+        
+        return new JwtResponse(
+            new JwtSecurityTokenHandler().WriteToken(token),
+            token.ValidTo,
+            refreshToken.Token.ToString()
+        );
+    }
+
+    public async Task<JwtResponse> RefreshToken(string refreshToken, string userId)
+    {
+        RefreshToken token = await _context.RefreshTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Token == Guid.Parse(refreshToken) && t.UserId == userId)
+            ?? throw new LogInException();
+
+        var newRefreshToken = new RefreshToken(userId);
+        await _context.RefreshTokens.AddAsync(newRefreshToken);
+        _context.RefreshTokens.Remove(token);
+        await _context.SaveChangesAsync();
+        
+        JwtSecurityToken responseToken = GenerateToken(token?.User ?? throw new LogInException());
+        return new JwtResponse(
+            new JwtSecurityTokenHandler().WriteToken(responseToken),
+            responseToken.ValidTo,
+            newRefreshToken.Token.ToString()
+        );
     }
 
     private JwtSecurityToken GenerateToken(ApplicationUser user)
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim("ProfilePicture", user.ProfilePicture),
             new Claim("DisplayName", user.DisplayName),
             new Claim("DiscordUsername", user.DiscordUsername),

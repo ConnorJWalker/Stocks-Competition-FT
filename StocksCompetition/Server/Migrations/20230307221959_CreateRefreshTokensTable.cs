@@ -14,7 +14,7 @@ namespace StocksCompetition.Server.Migrations
                 name: "RefreshTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "varchar(64)", nullable: false)
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RefreshToken = table.Column<string>(type: "varchar(64)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
